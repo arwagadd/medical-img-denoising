@@ -92,8 +92,6 @@ def unify_shape(X: list[np.ndarray]) -> np.ndarray:
     
     return unified_data
 
-
-
 def gen_y(X: List[np.ndarray]) -> List[tuple[np.ndarray, np.ndarray]] :
     noisy_images = []
     for x in X:
@@ -103,15 +101,20 @@ def gen_y(X: List[np.ndarray]) -> List[tuple[np.ndarray, np.ndarray]] :
     return noisy_images
 
 
-def save_data(X: np.ndarray, Y: np.ndarray, path: str) -> int :
-    ...
-
+def save_data(X: np.ndarray, Y: np.ndarray, path: str, batch_index: int) :
+    if not os.path.exists(path):
+        print(f"Directory {path} does not exist")
+        return
+    
+    # extracting noisy images from gen_y
+    for i, (original_image, noisy_image) in enumerate(zip(X,Y)):
+        cv2.imwrite(os.path.join(path, f"image_{batch_index}_{i}.jpg"), noisy_image)
 
 
 def main() :
     # Test the load_data and unify_shape
-    raw_data_path = ""  # Replace with the path to your raw data directory
-    batch_size = 32  # Choose an appropriate batch size
+    raw_data_path = ""  
+    batch_size = 32 
 
     loaded_data = load_data(raw_data_path, batch_size)
     total_images = 0
@@ -120,18 +123,25 @@ def main() :
         unified_batch = unify_shape(batch_images)
         print(f"Batch {i+1}: Shape {unified_batch.shape}")
 
-        # Generate noisy images from the unified batch
         noisy_images = gen_y(unified_batch)
-        for original_image, noisy_image in noisy_images:
-            # Display or save the original and noisy images
-            plt.figure(figsize=(10, 5))
-            plt.subplot(1, 2, 1)
-            plt.imshow(cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB))
-            plt.title('Original Image')
-            plt.subplot(1, 2, 2)
-            plt.imshow(cv2.cvtColor(noisy_image, cv2.COLOR_BGR2RGB))
-            plt.title('Noisy Image')
-            plt.show()
+
+        # Extracting noisy images from gen_y
+        noisy_images_array = np.array([noisy_image for _, noisy_image in noisy_images])
+
+        save_data(unified_batch, noisy_images_array, "dbs/intermittent/noisy_images",i)
+
+        save_data(unified_batch,unified_batch, "dbs/intermittent/unified_images",i)
+
+        # for original_image, noisy_image in noisy_images:
+        #     # Display or save the original and noisy images
+        #     plt.figure(figsize=(10, 5))
+        #     plt.subplot(1, 2, 1)
+        #     plt.imshow(cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB))
+        #     plt.title('Original Image')
+        #     plt.subplot(1, 2, 2)
+        #     plt.imshow(cv2.cvtColor(noisy_image, cv2.COLOR_BGR2RGB))
+        #     plt.title('Noisy Image')
+        #     plt.show()
 
     print("The total number of loaded images is ", total_images)
 
