@@ -1,8 +1,7 @@
-from typing import List, Generator, Optional
+from typing import List, Generator
 import os
 import cv2
 import numpy as np
-import matplotlib.pyplot as plt
 
 def load_data(path: str, batch_size: int) -> Generator[List[np.ndarray], None, None]:
     image_dir = os.path.join(path, "dbs", "raw", "archive", "GAN-Traning Images")
@@ -45,9 +44,6 @@ def convert_to_numpy(batch_images: List[np.ndarray], output_file: str):
     np.save(output_file, batch_array)
 
 
-def unify_shape(X: list[np.ndarray]) -> np.ndarray:
-    ...
-
 def gen_y(X: List[np.ndarray]) -> List[tuple[np.ndarray, np.ndarray]]:
     noisy_images = []
     for x in X:
@@ -59,16 +55,6 @@ def gen_y(X: List[np.ndarray]) -> List[tuple[np.ndarray, np.ndarray]]:
     
     original_images = np.stack(X)
     return list(zip(original_images, noisy_images))
-
-
-
-def save_data(X: np.ndarray, Y: np.ndarray, path: str, batch_index: int):
-    ...
-    # Save X and Y as x.npy and y.npy
-
-    # save 2 files: x.npy y.npy
-    # x.npy: dim[x]=[batch,w,h,c]  noised img
-    # y.npy: dim[y]=[batch,w,h,c]  denoised/unified 
 
 
 def main():
